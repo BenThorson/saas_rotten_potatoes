@@ -7,7 +7,15 @@ class MoviesController < ApplicationController
   end
 
   def index
+    # debugger
     @movies = Movie.all
+    @test = {}  
+    if params.has_key?(:sort_by)
+      # debugger
+      @movies = @movies.send (:sort_by) { |movie| movie.send(params[:sort_by])} 
+      @test[params[:sort_by].to_sym] = "hilite"
+      # flash[params[:sort_by].to_sym] = "hilite"
+    end
   end
 
   def new
