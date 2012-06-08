@@ -8,15 +8,14 @@ class MoviesController < ApplicationController
 
   def index
     # debugger
-    @movies = Movie.all
-    @test = {}  
-    if params.has_key?(:sort_by)
-      # debugger
-      @movies = @movies.send (:sort_by) { |movie| movie.send(params[:sort_by])} 
-      @test[params[:sort_by].to_sym] = "hilite"
-      # flash[params[:sort_by].to_sym] = "hilite"
-    end
-  end
+    @all_ratings = Movie.all.map(&:rating).uniq.sort
+    @selected_ratings = params[:ratings]
+    @selected_ratings ||= {}
+    sort = params[:sort_by].nil? ? :id : params[:sort_by].to_sym
+    @movies = Movie.where(:rating => params[:ratings] ? params[:ratings].keys : @all_ratings).order(sort)
+    @test = {sort => "hilite"}  
+    # debugger
+   end
 
   def new
     # default: render 'new' template
