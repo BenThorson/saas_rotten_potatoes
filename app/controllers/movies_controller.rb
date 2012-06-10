@@ -7,15 +7,21 @@ class MoviesController < ApplicationController
   end
 
   def index
-    # debugger
     @all_ratings = Movie.all.map(&:rating).uniq.sort
-    @selected_ratings = params[:ratings]
-    @selected_ratings ||= {}
-    sort = params[:sort_by].nil? ? :id : params[:sort_by].to_sym
-    @movies = Movie.where(:rating => params[:ratings] ? params[:ratings].keys : @all_ratings).order(sort)
-    @test = {sort => "hilite"}  
+    session[:selected_ratings] = params[:ratings] unless params[:ratings].nil?
+    session[:selected_ratings] ||= {}
+    session[:sort_by] = params[:sort_by].to_sym unless params[:sort_by].nil?
+    session[:sort_by] ||= :id
+    @movies = Movie.where(:rating => params[:ratings] ? session[:selected_ratings].keys : @all_ratings).order(session[:sort_by])
+    session[:hilite] = {session[:sort_by] => "hilite"}  
     # debugger
-   end
+    if ((params[:ratings].nil? && !session[:selected_ratings].empty?) || (params[:sort_by].nil? && session[:sort_by] != :id))
+      params[:ratings] = session[:selected_ratings]
+      params[:sort_by] = session[:sort_by]
+      flash.keep
+      redirect_to movies_path(params)
+    end
+  end
 
   def new
     # default: render 'new' template
